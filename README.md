@@ -35,7 +35,9 @@ Build and Deploy the Quickstarts
 -----------------------------------------
 
 See the README file in each individual quickstart folder for specific details and information on how to run and access the example.
-###Build the Quickstart Archive
+
+Build the Quickstart Archive
+-----------------------------------
 
 In most cases, you can use the following steps to build the application to test for compile errors or to view the contents of the archive. See the specific quickstart README file for complete details.
 
@@ -43,10 +45,12 @@ In most cases, you can use the following steps to build the application to test 
 
 2. Use the following command if you only want to build the archive, but not deploy it.
 
-    
+    ````
     $ mvn clean install
+    ````
 
-###Build and Deploy the Quickstart
+Build and Deploy the Quickstart
+---------------------------------
 
 This section describes the basic steps to build and deploy an application. See the specific instructions in each quickstart README file for any variations to this process.
 
@@ -56,12 +60,14 @@ This section describes the basic steps to build and deploy an application. See t
 
 3. Use the following command to build and deploy the archive.
 
-    
+    ````
     $ mvn clean install wildfly:deploy
+    ````
 
-###Undeploy an Archive
+Undeploy an Archive
+------------------------------
 
 Use the following command to undeploy the quickstart.
-
+    
     $ mvn wildfly:undeploy
-
+    

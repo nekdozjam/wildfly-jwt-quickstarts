@@ -1,0 +1,19 @@
+# Batch script to enable elytron for the quickstart application in the WildFly server
+
+batch
+
+# Add a new token security realm to elytron for authentication using JWTs
+/subsystem=elytron/token-realm=jwt-realm:add(jwt={issuer=["quickstart-jwt-issuer"],public-key="-----BEGIN PUBLIC KEY-----MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAy45LzIcnzQzEMbJ/vbFU080aqq/kLzSsCJKwIsY2FF5mAyH8gKHf9OOAImsalV5elrOGy27fUNIJlBmAjhyW4wJAhs/PfrubhmtZhBJV4f4CGEJb7hteWD8h+TPr2zDz0w95PibCk1pbqniy9ARBLN/NkZE5fSHmC8IyMXDwJI54B7C/rtZKtW2nhL45q7xUvM04mhhrKhA9ce1DD+W0sk4Ogp2mPX3yr71+1siYPUebQgXmTMPU2Z6C27he4bTAb8XhDUbBvFQih4xTas4YJqbpR+eaT+PrPC7+mIFcyHPLntTjKHVqxTeUR4x6VxRwBXOxhh5CKTPZeVr8mBI53wIDAQAB-----END PUBLIC KEY-----"},principal-claim="sub")
+
+# Add a new security domain, which uses the jwt security realm
+/subsystem=elytron/security-domain=jwt-domain:add(realms=[{realm=jwt-realm,role-decoder=groups-to-roles}],permission-mapper=default-permission-mapper,default-realm=jwt-realm)
+
+# Create http authentication factory that uses BEARER_TOKEN authentication
+/subsystem=elytron/http-authentication-factory=jwt-http-authentication:add(security-domain=jwt-domain,http-server-mechanism-factory=global,mechanism-configurations=[{mechanism-name="BEARER_TOKEN",mechanism-realm-configurations=[{realm-name="jwt-realm"}]}])
+
+# Configure Undertow to use our http authentication factory for authentication
+/subsystem=undertow/application-security-domain=other:add(http-authentication-factory=jwt-http-authentication)
+
+run-batch
+
+reload

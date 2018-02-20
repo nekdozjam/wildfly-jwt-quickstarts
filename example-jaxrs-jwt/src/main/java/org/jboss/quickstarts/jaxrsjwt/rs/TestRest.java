@@ -1,0 +1,101 @@
+package org.jboss.quickstarts.jaxrsjwt.rs;
+
+import com.nimbusds.jwt.JWT;
+import com.nimbusds.jwt.JWTParser;
+import org.jboss.quickstarts.jaxrsjwt.auth.JwtManager;
+import org.jboss.quickstarts.jaxrsjwt.auth.LoginRequest;
+import org.jboss.quickstarts.jaxrsjwt.user.User;
+import org.jboss.quickstarts.jaxrsjwt.model.Jwt;
+import org.jboss.quickstarts.jaxrsjwt.user.UserService;
+
+import javax.ejb.EJB;
+import javax.inject.Inject;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.GET;
+import javax.ws.rs.HeaderParam;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.SecurityContext;
+import java.security.Principal;
+import java.text.ParseException;
+import java.util.logging.Logger;
+
+@Path("/")
+@Produces(MediaType.APPLICATION_JSON)
+@Consumes(MediaType.APPLICATION_JSON)
+public class TestRest {
+
+	private static final Logger log = Logger.getLogger(TestRest.class.getName());
+
+	@Inject
+	JwtManager jwtManager;
+
+	@EJB
+    UserService service;
+
+	@Context
+	private SecurityContext securityContext;
+
+	//Security constraints are defined in web.xml
+
+	@GET
+	@Path("/customer")
+	public String getCustomerJSON() {
+		return "{\"path\":\"customer\",\"result\":"+sayHello()+"}";
+	}
+
+	@GET
+	@Path("/protected")
+	public String getProtectedJSON() {
+		return "{\"path\":\"protected\",\"result\":"+sayHello()+"}";
+	}
+
+    @GET
+    @Path("/public")
+    public String getPublicJSON() {
+        return "{\"path\":\"public\",\"result\":"+sayHello()+"}";
+    }
+
+    @GET
+    @Path("/claims")
+    public Response demonstrateClaims(@HeaderParam("Authorization") String auth) {
+	    if (auth != null && auth.startsWith("Bearer ")) {
+            try {
+                JWT j = JWTParser.parse(auth.substring(7));
+            	return Response.ok("{\"sub\":\""+j.getJWTClaimsSet().getSubject()+"\"}").build();
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
+        }
+	    return Response.ok("{\"result\":\"No jwt token\"}").build();
+    }
+
+	@POST
+	@Path("/token")
+	@Consumes(MediaType.APPLICATION_JSON)
+	public Response postJWT(LoginRequest request) {
+		try {
+            User user = service.authenticate(request.getUsername(), request.getPassword());
+            if (user != null) {
+				if (user.getName() != null) {
+					log.info("Generating JWT for org.jboss.user " + user.getName());
+				}
+                String token = jwtManager.createJwt(user.getName(), user.getRoles());
+                return Response.ok(new Jwt(token)).build();
+            }
+		} catch (Exception e) {
+		    log.info(e.getMessage());
+        }
+		return Response.status(Response.Status.UNAUTHORIZED).build();
+	}
+
+	private String sayHello() {
+        Principal userPrincipal = securityContext.getUserPrincipal();
+        String principalName = userPrincipal == null ? "anonymous" : userPrincipal.getName();
+        return "\"Hello " + principalName + "!\"";
+    }
+}
