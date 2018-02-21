@@ -54,6 +54,7 @@ public class JwtManager {
     private static final int TOKEN_VALIDITY = 14400;
     private static final String CLAIM_ROLES = "groups";
     private static final String ISSUER = "quickstart-jwt-issuer";
+    private static final String AUDIENCE = "jwt-audience";
 
     public String createJwt(final String subject, final String[] roles) throws Exception {
         JWSSigner signer = new RSASSASigner(privateKey);
@@ -63,8 +64,9 @@ public class JwtManager {
         JsonObjectBuilder claimsBuilder = Json.createObjectBuilder()
                 .add("sub", subject)
                 .add("iss", ISSUER)
+                .add("aud", AUDIENCE)
                 .add(CLAIM_ROLES, rolesBuilder.build())
-                .add("exp", (System.currentTimeMillis() / 1000) + TOKEN_VALIDITY);
+                .add("exp", ((System.currentTimeMillis() / 1000) + TOKEN_VALIDITY));
 
         JWSObject jwsObject = new JWSObject(new JWSHeader.Builder(JWSAlgorithm.RS256)
                 .type(new JOSEObjectType("jwt")).build(),

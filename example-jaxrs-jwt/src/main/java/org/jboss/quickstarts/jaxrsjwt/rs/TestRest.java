@@ -3,7 +3,6 @@ package org.jboss.quickstarts.jaxrsjwt.rs;
 import com.nimbusds.jwt.JWT;
 import com.nimbusds.jwt.JWTParser;
 import org.jboss.quickstarts.jaxrsjwt.auth.JwtManager;
-import org.jboss.quickstarts.jaxrsjwt.auth.LoginRequest;
 import org.jboss.quickstarts.jaxrsjwt.user.User;
 import org.jboss.quickstarts.jaxrsjwt.model.Jwt;
 import org.jboss.quickstarts.jaxrsjwt.user.UserService;
@@ -11,6 +10,7 @@ import org.jboss.quickstarts.jaxrsjwt.user.UserService;
 import javax.ejb.EJB;
 import javax.inject.Inject;
 import javax.ws.rs.Consumes;
+import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
@@ -66,7 +66,7 @@ public class TestRest {
 	    if (auth != null && auth.startsWith("Bearer ")) {
             try {
                 JWT j = JWTParser.parse(auth.substring(7));
-            	return Response.ok("{\"sub\":\""+j.getJWTClaimsSet().getSubject()+"\"}").build();
+            	return Response.ok(j.getJWTClaimsSet().getClaims()).build(); //Note: nimbusds converts token expiration time to milliseconds
             } catch (ParseException e) {
                 e.printStackTrace();
             }
@@ -76,10 +76,11 @@ public class TestRest {
 
 	@POST
 	@Path("/token")
-	@Consumes(MediaType.APPLICATION_JSON)
-	public Response postJWT(LoginRequest request) {
+    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+	public Response postJWT(@FormParam("username") String username, @FormParam("password") String password) {
+	    log.info("Authenticating " + username);
 		try {
-            User user = service.authenticate(request.getUsername(), request.getPassword());
+            User user = service.authenticate(username, password);
             if (user != null) {
 				if (user.getName() != null) {
 					log.info("Generating JWT for org.jboss.user " + user.getName());

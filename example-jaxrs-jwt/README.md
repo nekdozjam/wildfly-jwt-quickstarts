@@ -16,11 +16,14 @@ There are 4 resource endpoints + 1 for generating JWTs:
 
 * `/rest/token` - POST endpoint for generating tokens from provided credentials
 
+Note: This quickstart uses only few JWT claims to demonstrate usage. You should use all claims required by the
+specification you are using.
+
 System Requirements
 -------------------
 You need to have WildFly Application Server 12 running.
 
-ll you need to build this project is Java 8.0 (Java SDK 1.8) or later and Maven 3.1.1 or later.
+All you need to build this project is Java 8.0 (Java SDK 1.8) or later and Maven 3.1.1 or later.
 
 Configure the Server
 ------------------------------------

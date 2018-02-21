@@ -1,10 +1,10 @@
 package org.jboss.quickstarts.jaxrsjwt.client;
 
-import org.jboss.quickstarts.jaxrsjwt.auth.LoginRequest;
 import org.jboss.quickstarts.jaxrsjwt.model.Jwt;
 
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Entity;
+import javax.ws.rs.core.Form;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
@@ -36,8 +36,10 @@ public class JwtRestClient {
         System.out.println("Testing "+username+" ");
         System.out.println("-----------------------");
         System.out.println("Obtaining JWT...");
-        LoginRequest loginRequest = new LoginRequest(username, password);
-        Jwt jwt = ClientBuilder.newClient().target(REST_TARGET_URL).path("/token").request().post(Entity.entity(loginRequest, MediaType.APPLICATION_JSON), Jwt.class);
+        Form form = new Form();
+        form.param("username", username);
+        form.param("password", password);
+        Jwt jwt = ClientBuilder.newClient().target(REST_TARGET_URL).path("/token").request().post(Entity.entity(form, MediaType.APPLICATION_FORM_URLENCODED), Jwt.class);
         if (jwt == null) {
             System.out.println("Failed to obtain JWT.");
             return;
